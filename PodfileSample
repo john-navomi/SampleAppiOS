@@ -1,0 +1,20 @@
+source 'https://github.com/LivePersonInc/iOSPodSpecs.git'
+# platform :ios, '13.2'
+use_frameworks!
+
+target 'mobile-test-app' do
+  # Pods for mobile-test-app
+
+  use_frameworks!
+  pod 'LPMessagingSDK','5.1.1.1081'
+
+  target 'mobile-test-appTests' do
+    inherit! :search_paths
+    # Pods for testing
+  end
+
+  target 'mobile-test-appUITests' do
+    # Pods for testing
+  end
+
+end

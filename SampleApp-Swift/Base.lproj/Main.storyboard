@@ -1,0 +1,96 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<document type="com.apple.InterfaceBuilder3.CocoaTouch.Storyboard.XIB" version="3.0" toolsVersion="17156" targetRuntime="iOS.CocoaTouch" propertyAccessControl="none" useAutolayout="YES" useTraitCollections="YES" colorMatched="YES" initialViewController="abs-7c-Atn">
+    <device id="retina4_7" orientation="portrait" appearance="light"/>
+    <dependencies>
+        <deployment identifier="iOS"/>
+        <plugIn identifier="com.apple.InterfaceBuilder.IBCocoaTouchPlugin" version="17125"/>
+        <capability name="System colors in document resources" minToolsVersion="11.0"/>
+        <capability name="documents saved in the Xcode 8 format" minToolsVersion="8.0"/>
+    </dependencies>
+    <scenes>
+        <!--Navigation Controller-->
+        <scene sceneID="8vS-Uf-qdF">
+            <objects>
+                <navigationController automaticallyAdjustsScrollViewInsets="NO" id="abs-7c-Atn" sceneMemberID="viewController">
+                    <toolbarItems/>
+                    <navigationBar key="navigationBar" contentMode="scaleToFill" translucent="NO" id="AfC-SE-6OE">
+                        <rect key="frame" x="0.0" y="0.0" width="375" height="44"/>
+                        <autoresizingMask key="autoresizingMask"/>
+                    </navigationBar>
+                    <nil name="viewControllers"/>
+                    <connections>
+                        <segue destination="nhu-yH-hqQ" kind="relationship" relationship="rootViewController" id="l19-hz-Jk3"/>
+                    </connections>
+                </navigationController>
+                <placeholder placeholderIdentifier="IBFirstResponder" id="1B9-Xa-ubE" userLabel="First Responder" sceneMemberID="firstResponder"/>
+            </objects>
+            <point key="canvasLocation" x="-446" y="-331"/>
+        </scene>
+        <!--Main View Controller-->
+        <scene sceneID="S0G-GT-yjg">
+            <objects>
+                <viewController id="nhu-yH-hqQ" customClass="MainViewController" customModule="SampleApp" customModuleProvider="target" sceneMemberID="viewController">
+                    <layoutGuides>
+                        <viewControllerLayoutGuide type="top" id="mcF-Xo-aC2"/>
+                        <viewControllerLayoutGuide type="bottom" id="N4q-Lq-g6g"/>
+                    </layoutGuides>
+                    <view key="view" contentMode="scaleToFill" id="fKd-CA-pqj">
+                        <rect key="frame" x="0.0" y="0.0" width="375" height="623"/>
+                        <autoresizingMask key="autoresizingMask" widthSizable="YES" heightSizable="YES"/>
+                        <subviews>
+                            <stackView opaque="NO" contentMode="scaleToFill" axis="vertical" distribution="fillEqually" spacing="16" translatesAutoresizingMaskIntoConstraints="NO" id="kvw-DM-8ry">
+                                <rect key="frame" x="24" y="263.5" width="327" height="96"/>
+                                <subviews>
+                                    <button opaque="NO" contentMode="scaleToFill" contentHorizontalAlignment="center" contentVerticalAlignment="center" buttonType="system" lineBreakMode="middleTruncation" translatesAutoresizingMaskIntoConstraints="NO" id="SML-m8-HUN">
+                                        <rect key="frame" x="0.0" y="0.0" width="327" height="40"/>
+                                        <color key="backgroundColor" systemColor="secondarySystemBackgroundColor"/>
+                                        <constraints>
+                                            <constraint firstAttribute="height" constant="40" id="Zhc-hm-17s"/>
+                                        </constraints>
+                                        <state key="normal" title="Messaging">
+                                            <color key="titleColor" systemColor="systemBlueColor"/>
+                                        </state>
+                                        <connections>
+                                            <action selector="messagingClicked:" destination="nhu-yH-hqQ" eventType="touchUpInside" id="kr0-SN-wCJ"/>
+                                        </connections>
+                                    </button>
+                                    <button opaque="NO" contentMode="scaleToFill" contentHorizontalAlignment="center" contentVerticalAlignment="center" buttonType="system" lineBreakMode="middleTruncation" translatesAutoresizingMaskIntoConstraints="NO" id="FI2-yw-E4J">
+                                        <rect key="frame" x="0.0" y="56" width="327" height="40"/>
+                                        <color key="backgroundColor" systemColor="secondarySystemBackgroundColor"/>
+                                        <state key="normal" title="Monitoring">
+                                            <color key="titleColor" systemColor="systemBlueColor"/>
+                                        </state>
+                                        <connections>
+                                            <action selector="monitoringClicked:" destination="nhu-yH-hqQ" eventType="touchUpInside" id="Qr3-Rm-UbQ"/>
+                                        </connections>
+                                    </button>
+                                </subviews>
+                            </stackView>
+                        </subviews>
+                        <color key="backgroundColor" systemColor="systemBackgroundColor"/>
+                        <constraints>
+                            <constraint firstItem="kvw-DM-8ry" firstAttribute="leading" secondItem="fKd-CA-pqj" secondAttribute="leadingMargin" constant="8" id="8DE-OU-DgB"/>
+                            <constraint firstAttribute="trailingMargin" secondItem="kvw-DM-8ry" secondAttribute="trailing" constant="8" id="ZQ6-K9-bbt"/>
+                            <constraint firstItem="kvw-DM-8ry" firstAttribute="centerX" secondItem="fKd-CA-pqj" secondAttribute="centerX" id="eIW-VO-uHa"/>
+                            <constraint firstItem="kvw-DM-8ry" firstAttribute="centerY" secondItem="fKd-CA-pqj" secondAttribute="centerY" id="hny-4h-W97"/>
+                        </constraints>
+                    </view>
+                    <navigationItem key="navigationItem" id="zy8-gK-cs7"/>
+                </viewController>
+                <placeholder placeholderIdentifier="IBFirstResponder" id="vFr-jV-gbG" userLabel="First Responder" sceneMemberID="firstResponder"/>
+            </objects>
+            <point key="canvasLocation" x="288.80000000000001" y="-331.48425787106447"/>
+        </scene>
+    </scenes>
+    <resources>
+        <systemColor name="secondarySystemBackgroundColor">
+            <color red="0.94901960784313721" green="0.94901960784313721" blue="0.96862745098039216" alpha="1" colorSpace="custom" customColorSpace="sRGB"/>
+        </systemColor>
+        <systemColor name="systemBackgroundColor">
+            <color white="1" alpha="1" colorSpace="custom" customColorSpace="genericGamma22GrayColorSpace"/>
+        </systemColor>
+        <systemColor name="systemBlueColor">
+            <color red="0.0" green="0.47843137254901963" blue="1" alpha="1" colorSpace="custom" customColorSpace="sRGB"/>
+        </systemColor>
+    </resources>
+</document>
