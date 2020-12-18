@@ -22,6 +22,9 @@ class MessagingViewController: UIViewController {
     @IBOutlet var authenticationSwitch: UISwitch!
     
     //MARK: - Properties
+    private var pageId: String?
+    private var campaignInfo: LPCampaignInfo?
+    
     private var windowSwitchValue: Bool {
         set {
             UserDefaults.standard.set(newValue, forKey: "WindowSwitch")
@@ -156,7 +159,7 @@ extension MessagingViewController {
          https://developers.liveperson.com/mobile-app-messaging-sdk-for-ios-sdk-apis-messaging-api.html#initialize
      */
     private func initLPSDKwith(accountNumber: String) {
-        let appInstallID: String = "1bf3b045-2bce-4c2f-a51b-2aab6142e526"
+        let appInstallID: String = "6ede89e2-6a28-4812-827b-31ee35838bf2"
         
         let monitoringInitParams = LPMonitoringInitParams(appInstallID: appInstallID)
         
@@ -192,13 +195,13 @@ extension MessagingViewController {
 
         //LPAuthenticationParams
         var authenticationParams: LPAuthenticationParams?
-        if authenticatedMode {
+       // if authenticatedMode {
             authenticationParams = LPAuthenticationParams(authenticationCode: authenticationCode,
                                                           jwt: authenticationJWT,
                                                           redirectURI: nil,
                                                           certPinningPublicKeys: nil,
-                                                          authenticationType: .signup)
-        }
+                                                          authenticationType: .unauthenticated)
+       // }
         
         // update Account number and ConversationQuery (for ViewController Mode ONLY)
         if self.conversationViewController != nil {
@@ -209,32 +212,56 @@ extension MessagingViewController {
         //LPWelcomeMessageParam
         let welcomeMessageParam = LPWelcomeMessage(message: "Hi", frequency: .FirstTimeConversation)
 
-//        let welcomeMessageOptions = [
-//            LPWelcomeMessageOption(value: "My latest bill statement", displayName: "1️⃣ Bill"),
-//            LPWelcomeMessageOption(value: "A recent order placed", displayName: "2️⃣ Orders"),
-//            LPWelcomeMessageOption(value: "Technical support", displayName: "3️⃣ Support"),
-//            LPWelcomeMessageOption(value: "Account information", displayName: "4️⃣ Account")
-//        ]
-//
-//        do {
-//            try welcomeMessageParam.set(options: welcomeMessageOptions)
-//        }
-//        catch {
-//            print("cannot set welcome message options | error: \(error.localizedDescription)")
-//        }
-//
-//        welcomeMessageParam.set(NumberOfOptionsPerRow: 2)
+        //Get Engagement
+        // **************** Beginning of code to set the engagement and the SDE
         
-        //LPConversationViewParams
-        let conversationViewParams = LPConversationViewParams(conversationQuery: LPMessagingSDK.instance.getConversationBrandQuery(accountNumber),
-                                                              containerViewController: self.conversationViewController,
-                                                              isViewOnly: false,
-                                                              conversationHistoryControlParam: controlParam,
-                                                              welcomeMessage: welcomeMessageParam)
+        let entryPoints = [] as [String]
+        let engagementAttributes = [
+                    ["type": "ctmrinfo",
+                    "info": ["customerId": "12161216"]] // <----- replace the hardcoded value 12161216 with the customer's CIS
+        ]
         
-        LPMessagingSDK.instance.showConversation(conversationViewParams, authenticationParams: authenticationParams)
+        let monitoringParams = LPMonitoringParams(entryPoints: entryPoints, engagementAttributes: engagementAttributes)
+        
+        let identity = LPMonitoringIdentity(consumerID: nil, issuer: nil)
+        
+        LPMonitoringAPI.instance.getEngagement(identities: [identity], monitoringParams: monitoringParams, completion: { [weak self] (getEngagementResponse) in
+            
+            print("# of Campaigns received \(String(describing: getEngagementResponse.engagementDetails?.count))")
+            print("received get engagement response with pageID: \(String(describing: getEngagementResponse.pageId)), campaignID: \(String(describing: getEngagementResponse.engagementDetails?.first?.campaignId)), engagementID: \(String(describing: getEngagementResponse.engagementDetails?.first?.engagementId))")
+            
+            // Save PageId for future reference
+            self?.pageId = getEngagementResponse.pageId
+            
+            if let campaignID = getEngagementResponse.engagementDetails?.first?.campaignId,
+                let engagementID = getEngagementResponse.engagementDetails?.first?.engagementId,
+                let contextID = getEngagementResponse.engagementDetails?.first?.contextId,
+                let sessionID = getEngagementResponse.sessionId,
+                let visitorID = getEngagementResponse.visitorId {
+                
+                self?.campaignInfo = LPCampaignInfo(campaignId: campaignID, engagementId: engagementID, contextId: contextID, sessionId: sessionID, visitorId: visitorID)
+                
+            } else {
+                self?.campaignInfo = nil   // If the conversation is open the contextId is nil. The if statement above fails.
+                print("no campaign info found!")
+            }
+            
+            // Start the conversation
+            
+            //LPConversationViewParams
+            let conversationViewParams = LPConversationViewParams(conversationQuery: LPMessagingSDK.instance.getConversationBrandQuery(accountNumber, campaignInfo: self?.campaignInfo),
+                  containerViewController: nil,
+                  isViewOnly: false,
+                  conversationHistoryControlParam: controlParam,
+                  welcomeMessage: welcomeMessageParam)
+            
+            LPMessagingSDK.instance.showConversation(conversationViewParams, authenticationParams: authenticationParams)
 
-        self.setUserDetails()
+            self?.setUserDetails()
+        }) { (error) in
+            print("get engagement error: \(error.userInfo.description)")
+        }
+        // **************** End of code to set the engagement and the SDE
     }
     
     /**
@@ -248,7 +275,7 @@ extension MessagingViewController {
                           lastName: self.lastNameTextField.text!,
                           nickName: "my nick name",
                           uid: nil,
-                          profileImageURL: "http://www.mrbreakfast.com/ucp/342_6053_ucp.jpg",
+                          profileImageURL: "https://i-cdn.phonearena.com/images/article/68919-image/Emoji-usage-soars-according-to-Instagram.jpg",
                           phoneNumber: nil,
                           employeeID: "1111-1111")
         LPMessagingSDK.instance.setUserProfile(user, brandID: self.accountTextField.text!)
@@ -265,6 +292,45 @@ extension MessagingViewController {
             print("successfully logout from MessagingSDK")
         }) { (error) in
             print("failed to logout from MessagingSDK - error: \(error)")
+        }
+    }
+    
+    
+    /**
+     This method gets an engagement using LPMonitoingAPI
+     - NOTE: CampaignInfo will be saved in the response in order to start a conversation later (showConversation method from LPMessagingSDK)
+     
+     for more information on `showconversation` see:
+        https://developers.liveperson.com/mobile-app-messaging-sdk-for-ios-sdk-apis-monitoring-api.html#getengagement
+    */
+    private func getEngagement(entryPoints: [String], engagementAttributes: [[String:Any]]) {
+        //resetting pageId and campaignInfo
+        self.pageId = nil
+        self.campaignInfo = nil
+        
+        let monitoringParams = LPMonitoringParams(entryPoints: entryPoints, engagementAttributes: engagementAttributes)
+        
+        let identity = LPMonitoringIdentity(consumerID: nil, issuer: nil)
+        
+        LPMonitoringAPI.instance.getEngagement(identities: [identity], monitoringParams: monitoringParams, completion: { [weak self] (getEngagementResponse) in
+            
+            print("# of Campaigns received \(String(describing: getEngagementResponse.engagementDetails?.count))")
+            print("received get engagement response with pageID: \(String(describing: getEngagementResponse.pageId)), campaignID: \(String(describing: getEngagementResponse.engagementDetails?.first?.campaignId)), engagementID: \(String(describing: getEngagementResponse.engagementDetails?.first?.engagementId))")
+            
+            // Save PageId for future reference
+            self?.pageId = getEngagementResponse.pageId
+            
+            if let campaignID = getEngagementResponse.engagementDetails?.first?.campaignId,
+                let engagementID = getEngagementResponse.engagementDetails?.first?.engagementId,
+                let contextID = getEngagementResponse.engagementDetails?.first?.contextId,
+                let sessionID = getEngagementResponse.sessionId,
+                let visitorID = getEngagementResponse.visitorId {
+                self?.campaignInfo = LPCampaignInfo(campaignId: campaignID, engagementId: engagementID, contextId: contextID, sessionId: sessionID, visitorId: visitorID)
+            } else {
+                print("no campaign info found!")
+            }
+        }) { (error) in
+            print("get engagement error: \(error.userInfo.description)")
         }
     }
 }

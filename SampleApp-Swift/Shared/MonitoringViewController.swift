@@ -55,19 +55,22 @@ class MonitoringViewController: UIViewController {
     }
     
     @IBAction func getEngagementClicked(_ sender: Any) {
-        let entryPoints = ["tel://972737004000",
-                           "http://www.liveperson.com",
-                           "sec://Sport",
-                           "lang://Eng"]
+//        let entryPoints = ["tel://972737004000",
+//                           "http://www.liveperson.com",
+//                           "sec://Sport",
+//                           "lang://Eng"]
+//
+//        let engagementAttributes = [
+//            ["type": "purchase", "total": 20.0],
+//            ["type": "lead",
+//             "lead": ["topic": "luxury car test drive 2015",
+//                      "value": 22.22,
+//                      "leadId": "xyz123"]]
+//        ]
         
-        let engagementAttributes = [
-            ["type": "purchase", "total": 20.0],
-            ["type": "lead",
-             "lead": ["topic": "luxury car test drive 2015",
-                      "value": 22.22,
-                      "leadId": "xyz123"]]
-        ]
-
+        let entryPoints = [] as [String]
+        let engagementAttributes = [] as [[String:Any]]
+        
         getEngagement(entryPoints: entryPoints, engagementAttributes: engagementAttributes)
     }
     
@@ -141,11 +144,17 @@ extension MonitoringViewController {
         self.campaignInfo = nil
         
         let monitoringParams = LPMonitoringParams(entryPoints: entryPoints, engagementAttributes: engagementAttributes)
+        
         let identity = LPMonitoringIdentity(consumerID: consumerID, issuer: nil)
+        
         LPMonitoringAPI.instance.getEngagement(identities: [identity], monitoringParams: monitoringParams, completion: { [weak self] (getEngagementResponse) in
+            
+            print("# of Campaigns received \(String(describing: getEngagementResponse.engagementDetails?.count))")
             print("received get engagement response with pageID: \(String(describing: getEngagementResponse.pageId)), campaignID: \(String(describing: getEngagementResponse.engagementDetails?.first?.campaignId)), engagementID: \(String(describing: getEngagementResponse.engagementDetails?.first?.engagementId))")
+            
             // Save PageId for future reference
             self?.pageId = getEngagementResponse.pageId
+            
             if let campaignID = getEngagementResponse.engagementDetails?.first?.campaignId,
                 let engagementID = getEngagementResponse.engagementDetails?.first?.engagementId,
                 let contextID = getEngagementResponse.engagementDetails?.first?.contextId,
@@ -188,6 +197,10 @@ extension MonitoringViewController {
          https://developers.liveperson.com/mobile-app-messaging-sdk-for-ios-sdk-apis-messaging-api.html#showconversation
      */
     private func showConversationWith(accountNumber: String, campaignInfo: LPCampaignInfo) {
+        
+        campaignInfo.campaignId = 2474468530
+        campaignInfo.engagementId = 2474469030
+        
         let conversationQuery = LPMessagingSDK.instance.getConversationBrandQuery(accountNumber, campaignInfo: campaignInfo)
         let conversationViewParam = LPConversationViewParams(conversationQuery: conversationQuery, isViewOnly: false)
         LPMessagingSDK.instance.showConversation(conversationViewParam)
